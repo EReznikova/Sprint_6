@@ -7,3 +7,8 @@ venv/
 env/
 .env
 *.log
+
+# Allure test artifacts
+allure/
+allure-results/
+--alluredir=allure
