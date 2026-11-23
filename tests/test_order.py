@@ -1,98 +1,58 @@
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.wait import WebDriverWait
-from pages.order_page import OrderPage
-from pages.main_page import MainPage
-
-import pytest
 import allure
+from data.order_data import BOTTOM_ORDER_DATA, TOP_ORDER_DATA
 
 class TestOrder:
-    @pytest.mark.parametrize(
-    "order_button, name, last_name, address, metro, phone",
-    [
-        (
-            "top",
-            "Анна",
-            "Иванова",
-            "Москва, Тверская 1",
-            "Сокольники",
-            "+79151234567",
-        ),
-        (
-            "bottom",
-            "Мария",
-            "Петрова",
-            "Москва, Арбат 10",
-            "Охотный Ряд",
-            "+79261234567",
-        ),
-    ],
-        ids=["верхняя_кнопка", "нижняя_кнопка"],
-    )
-    def test_order(
-        self,
-        driver,
-        order_button,
-        name,
-        last_name,
-        address,
-        metro,
-        phone,
-    ):
-        main_page = MainPage(driver)
-        order_page = OrderPage(driver)
-
+    @allure.title("Проверка верхней кнопки")
+    def test_order_top_button(self, main_page, order_page):
         main_page.open()
+        main_page.order_top_click()
 
-        if order_button == "top":
-            main_page.order_top_click()
-        else:
-            main_page.order_bottom_click()
-
-        order_page.fill_name(name)
-        order_page.fill_last_name(last_name)
-        order_page.fill_address(address)
-        order_page.select_metro(metro)
-        order_page.fill_phone(phone)
+        order_page.fill_name(TOP_ORDER_DATA["name"])
+        order_page.fill_last_name(TOP_ORDER_DATA["last_name"])
+        order_page.fill_address(TOP_ORDER_DATA["address"])
+        order_page.select_metro(TOP_ORDER_DATA["metro"])
+        order_page.fill_phone(TOP_ORDER_DATA["phone"])
         order_page.next_button_click()
 
-        order_page.fill_date("01.01.2027")
-        order_page.select_rental_period("сутки")
+        order_page.fill_date(TOP_ORDER_DATA["date"])
+        order_page.select_rental_period(TOP_ORDER_DATA["period"])
         order_page.select_black_color()
-        order_page.fill_comment("Позвонить за час")
+        order_page.fill_comment(TOP_ORDER_DATA["comment"])
         order_page.click_order_button()
         order_page.confirm_order()
-
         assert order_page.is_order_created()
 
-    def test_scooter_logo(self, driver):  
-        main_page = MainPage(driver)
+    @allure.title("Проверка нижней кнопки")
+    def test_order_button_button(self, main_page, order_page):
         main_page.open()
-        main_page.scooter_logo_click();
-        assert driver.current_url == main_page.URL
+        main_page.confirm_click_if_present()
+        main_page.order_bottom_click()
 
-    def test_yandex_logo(self, driver):
-        main_page = MainPage(driver)
+        order_page.fill_name(BOTTOM_ORDER_DATA["name"])
+        order_page.fill_last_name(BOTTOM_ORDER_DATA["last_name"])
+        order_page.fill_address(BOTTOM_ORDER_DATA["address"])
+        order_page.select_metro(BOTTOM_ORDER_DATA["metro"])
+        order_page.fill_phone(BOTTOM_ORDER_DATA["phone"])
+        order_page.next_button_click()
+
+        order_page.fill_date(BOTTOM_ORDER_DATA["date"])
+        order_page.select_rental_period(BOTTOM_ORDER_DATA["period"])
+        order_page.select_black_color()
+        order_page.fill_comment(BOTTOM_ORDER_DATA["comment"])
+        order_page.click_order_button()
+        order_page.confirm_order()
+        assert order_page.is_order_created()
+
+    @allure.title("Проверка самоката")
+    def test_scooter_logo(self, main_page):
         main_page.open()
+        main_page.scooter_logo_click()
+        assert main_page.is_current_url(main_page.URL)
 
-        original_window = driver.current_window_handle
-
-        main_page.yandex_logo_click()
-
-        WebDriverWait(driver, 10).until(
-            EC.number_of_windows_to_be(2)
-        )
-
-        new_window = next(
-            window for window in driver.window_handles
-            if window != original_window
-        )
-        driver.switch_to.window(new_window)
-
-        WebDriverWait(driver, 10).until(
-            EC.url_contains("ya.ru")
-        )
-
-        assert "ya.ru" in driver.current_url
+    @allure.title("Проверка лого яндекса")
+    def test_yandex_logo(self, main_page):
+        main_page.open()
+        main_page.open_yandex()
+        assert main_page.is_url_contains("ya.ru")
                   
 
