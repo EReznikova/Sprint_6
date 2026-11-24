@@ -25,15 +25,9 @@ def order_page(driver):
     return OrderPage(driver)
 
 
-@pytest.fixture(scope="class")
-def faq_page():
-    browser = webdriver.Firefox()
-    browser.maximize_window()
+@pytest.fixture
+def faq_page(main_page):
+    main_page.open()
+    main_page.confirm_click()
 
-    page = MainPage(browser)
-    page.open()
-    page.confirm_click()
-
-    yield page
-
-    browser.quit()
+    return main_page
